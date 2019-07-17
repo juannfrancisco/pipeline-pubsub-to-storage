@@ -46,7 +46,7 @@ public class StarterPipeline {
 
     Pipeline p = Pipeline.create(options);
 
-    p.apply("escuchando eventos", PubsubIO.readMessagesWithAttributes().fromSubscription("") )
+    p.apply("escuchando eventos", PubsubIO.readMessagesWithAttributes().fromSubscription( options.getTopicName()) )
             //fromTopic(options.getTopicName()))
             //.apply("Filter Events If Enabled", ParDo.of(new ExtractAndFilterEventsFn()))
             .apply( new PubSubToText() )
