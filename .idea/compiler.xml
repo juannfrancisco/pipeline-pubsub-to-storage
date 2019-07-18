@@ -9,8 +9,5 @@
         <module name="pubsub-to-storage" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="pubsub-to-storage" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

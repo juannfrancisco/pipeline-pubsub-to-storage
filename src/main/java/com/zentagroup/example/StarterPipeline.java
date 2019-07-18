@@ -20,6 +20,7 @@ package com.zentagroup.example;
 import com.zentagroup.example.config.OptionPubSub;
 import com.zentagroup.example.functions.PubsubMessageToArchiveDoFn;
 import com.zentagroup.example.transforms.PubSubToText;
+import com.zentagroup.example.util.DurationUtils;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
@@ -29,6 +30,8 @@ import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
+import org.apache.beam.sdk.transforms.windowing.FixedWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,14 +46,18 @@ public class StarterPipeline {
     PipelineOptionsFactory.register(OptionPubSub.class);
     OptionPubSub options = PipelineOptionsFactory.fromArgs(args).withValidation().as(OptionPubSub.class);
 
+    options.setStreaming(true);
 
     Pipeline p = Pipeline.create(options);
 
     p.apply("escuchando eventos", PubsubIO.readMessagesWithAttributes().fromSubscription( options.getTopicName()) )
-            //fromTopic(options.getTopicName()))
-            //.apply("Filter Events If Enabled", ParDo.of(new ExtractAndFilterEventsFn()))
+            .apply(
+                     " Window 10",
+                    Window.into(FixedWindows.of(DurationUtils.parseDuration( "5s" ))))
             .apply( new PubSubToText() )
             .apply(TextIO.write()
+                    .withWindowedWrites()
+                    .withNumShards(1)
                     .to( options.getOutput() )
                     .withSuffix(".json"));
 
