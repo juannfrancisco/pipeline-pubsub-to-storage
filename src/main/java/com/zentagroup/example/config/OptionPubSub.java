@@ -15,5 +15,5 @@ public interface OptionPubSub extends PipelineOptions, StreamingOptions {
     @Description("Nombre del bucket destino para almacenar los eventos")
     @Validation.Required
     String getOutput();
-    void getOutput(String output);
+    void setOutput(String output);
 }
