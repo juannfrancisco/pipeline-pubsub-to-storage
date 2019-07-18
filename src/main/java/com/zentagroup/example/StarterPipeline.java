@@ -21,6 +21,7 @@ import com.zentagroup.example.config.OptionPubSub;
 import com.zentagroup.example.functions.PubsubMessageToArchiveDoFn;
 import com.zentagroup.example.transforms.PubSubToText;
 import com.zentagroup.example.util.DurationUtils;
+import com.zentagroup.example.util.WindowedFilenamePolicy;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
@@ -55,11 +56,16 @@ public class StarterPipeline {
                      " Window 10",
                     Window.into(FixedWindows.of(DurationUtils.parseDuration( "5s" ))))
             .apply( new PubSubToText() )
-            .apply(TextIO.write()
+            .apply("Escribir Archivo", TextIO.write()
                     .withWindowedWrites()
                     .withNumShards(1)
-                    .to( options.getOutput() )
-                    .withSuffix(".json"));
+                    .to(
+                            new WindowedFilenamePolicy(
+                                    options.getOutput(),
+                                    "event",
+                                    "W-P-SS-of-NN",
+                                    "text")).withSuffix(".text"));
+
 
     p.run();
   }
